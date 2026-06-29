@@ -27,9 +27,6 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
       scope: TESLA_SCOPES,
       locale: "en-US",
       prompt: "login",
-      prompt_missing_scopes: "true",
-      require_requested_scopes: "true",
-      show_keypair_step: "true",
     },
   },
   token: {

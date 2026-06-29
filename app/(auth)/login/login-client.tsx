@@ -24,10 +24,10 @@ export function LoginPageClient({ showDemo }: LoginPageClientProps) {
 
   function signInWithTesla() {
     if (isLocalhost) {
-      window.location.href = `${BRAND.productionUrl}/login?provider=tesla`;
+      window.location.href = `${BRAND.productionUrl}/auth/tesla`;
       return;
     }
-    signIn("tesla", { callbackUrl: "/dashboard" });
+    window.location.href = "/auth/tesla";
   }
 
   const autoSignInStarted = useRef(false);
@@ -37,7 +37,7 @@ export function LoginPageClient({ showDemo }: LoginPageClientProps) {
     const params = new URLSearchParams(window.location.search);
     if (params.get("provider") === "tesla") {
       autoSignInStarted.current = true;
-      signIn("tesla", { callbackUrl: "/dashboard" });
+      window.location.href = "/auth/tesla";
     }
   }, [isLocalhost]);
 
