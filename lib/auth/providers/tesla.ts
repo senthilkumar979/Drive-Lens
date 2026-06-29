@@ -43,7 +43,7 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
       name: profile.name ?? "Tesla Driver",
     };
   },
-  checks: ["pkce", "state"],
+  checks: ["pkce"],
 };
 
 export async function persistTeslaTokens(
