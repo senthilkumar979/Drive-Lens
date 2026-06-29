@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,6 +21,25 @@ export function LoginPageClient({ showDemo }: LoginPageClientProps) {
     typeof window !== "undefined" &&
     (window.location.hostname === "localhost" ||
       window.location.hostname === "127.0.0.1");
+
+  function signInWithTesla() {
+    if (isLocalhost) {
+      window.location.href = `${BRAND.productionUrl}/login?provider=tesla`;
+      return;
+    }
+    signIn("tesla", { callbackUrl: "/dashboard" });
+  }
+
+  const autoSignInStarted = useRef(false);
+
+  useEffect(() => {
+    if (isLocalhost || autoSignInStarted.current) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("provider") === "tesla") {
+      autoSignInStarted.current = true;
+      signIn("tesla", { callbackUrl: "/dashboard" });
+    }
+  }, [isLocalhost]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -46,19 +66,17 @@ export function LoginPageClient({ showDemo }: LoginPageClientProps) {
             </Button>
           )}
 
-          <Button
-            className="w-full"
-            onClick={() => signIn("tesla", { callbackUrl: "/dashboard" })}
-          >
+          <Button className="w-full" onClick={() => signInWithTesla()}>
             Sign in with Tesla
           </Button>
 
           {isLocalhost && (
-            <Button variant="outline" className="w-full" asChild>
-              <a href={`${BRAND.productionUrl}/login`}>
-                Sign in with Tesla (production)
-              </a>
-            </Button>
+            <p className="text-muted-foreground text-center text-xs leading-relaxed">
+              Local dev uses production Tesla OAuth (Akamai often blocks
+              localhost). You will land on{" "}
+              <span className="font-medium">{BRAND.productionUrl}</span> after
+              login. Use the same MongoDB on Vercel for data to appear locally.
+            </p>
           )}
 
           <Button
@@ -68,14 +86,6 @@ export function LoginPageClient({ showDemo }: LoginPageClientProps) {
           >
             Sign in with Google
           </Button>
-
-          {isLocalhost && (
-            <p className="text-muted-foreground text-center text-xs leading-relaxed">
-              If Tesla shows &quot;Access Denied&quot;, Akamai may be blocking
-              your network. Try production sign-in above, a mobile hotspot, or
-              incognito without VPN/extensions.
-            </p>
-          )}
         </CardContent>
       </Card>
     </div>

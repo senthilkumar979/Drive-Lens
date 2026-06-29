@@ -63,6 +63,42 @@ function normalizeHostname(value: string): string {
   return value.replace(/^https?:\/\//, "").replace(/\/$/, "");
 }
 
+function isLocalAuthUrl(url: string): boolean {
+  try {
+    const withProtocol = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    return isLocalHostname(new URL(withProtocol).hostname);
+  } catch {
+    return url.includes("localhost") || url.includes("127.0.0.1");
+  }
+}
+
+/**
+ * Public app URL for Auth.js callbacks. On Vercel, ignores localhost AUTH_URL
+ * and uses the deployment hostname instead.
+ */
+export function getAuthUrl(): string {
+  const explicit = process.env.AUTH_URL?.trim();
+
+  if (process.env.VERCEL === "1") {
+    const vercelHost =
+      process.env.VERCEL_ENV === "production"
+        ? process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim()
+        : process.env.VERCEL_URL?.trim();
+
+    if (vercelHost && (!explicit || isLocalAuthUrl(explicit))) {
+      return parseOrigin(vercelHost);
+    }
+  }
+
+  if (explicit) return explicit.replace(/\/$/, "");
+  return "http://localhost:3000";
+}
+
+/** Ensure Auth.js reads the resolved URL (not a stale localhost AUTH_URL on Vercel). */
+export function applyAuthUrlEnv(): void {
+  process.env.AUTH_URL = getAuthUrl();
+}
+
 function parseOrigin(value: string): string {
   const trimmed = value.trim();
   const withProtocol = /^https?:\/\//i.test(trimmed)
@@ -78,7 +114,7 @@ function collectOriginCandidates(): string[] {
     process.env.TESLA_REDIRECT_URI?.trim()
       ? new URL(process.env.TESLA_REDIRECT_URI.trim()).origin
       : undefined,
-    process.env.AUTH_URL?.trim(),
+    getAuthUrl(),
   ];
 
   return candidates

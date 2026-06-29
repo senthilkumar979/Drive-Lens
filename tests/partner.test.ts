@@ -71,3 +71,22 @@ describe("getTeslaPartnerDomain", () => {
     expect(getTeslaPartnerDomain()).toBe("drive-lens-one.vercel.app");
   });
 });
+
+describe("getAuthUrl", () => {
+  afterEach(() => {
+    delete process.env.AUTH_URL;
+    delete process.env.VERCEL;
+    delete process.env.VERCEL_ENV;
+    delete process.env.VERCEL_URL;
+    delete process.env.VERCEL_PROJECT_PRODUCTION_URL;
+  });
+
+  it("uses Vercel production host when AUTH_URL is localhost", async () => {
+    process.env.AUTH_URL = "http://localhost:3000";
+    process.env.VERCEL = "1";
+    process.env.VERCEL_ENV = "production";
+    process.env.VERCEL_PROJECT_PRODUCTION_URL = "drive-lens-one.vercel.app";
+    const { getAuthUrl } = await import("@/lib/env");
+    expect(getAuthUrl()).toBe("https://drive-lens-one.vercel.app");
+  });
+});
