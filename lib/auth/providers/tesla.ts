@@ -4,6 +4,7 @@ import { getTeslaFleetAuthUrl } from "@/lib/env";
 import { encryptToken } from "@/lib/crypto/encryption";
 import { upsertUser } from "@/lib/db/repositories";
 import { teslaOAuthFetch } from "./tesla-fetch";
+import { fetchTeslaUserProfile } from "./tesla-userinfo";
 
 interface TeslaProfile {
   email?: string;
@@ -35,7 +36,16 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
     url: `${getTeslaFleetAuthUrl()}/token`,
   },
   [customFetch]: teslaOAuthFetch,
-  userinfo: "https://auth.tesla.com/oauth2/v3/userinfo",
+  userinfo: {
+    async request(context: {
+      tokens: { access_token?: string; id_token?: string };
+    }) {
+      return fetchTeslaUserProfile(
+        context.tokens.access_token!,
+        context.tokens.id_token,
+      );
+    },
+  },
   profile(profile) {
     return {
       id: profile.sub ?? "tesla-user",

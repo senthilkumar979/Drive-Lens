@@ -20,7 +20,7 @@ interface LoginPageClientProps {
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   Configuration:
-    "Tesla token exchange failed (audience, client secret, or PKCE). Use Open Tesla login in the same browser — do not copy the link to another device.",
+    "Tesla login session expired or was started in another tab/device. Clear site cookies, click Sign in with Tesla again, and complete login in the same tab (do not copy the link).",
   AccessDenied: "Tesla denied access. Approve all requested scopes.",
   Verification: "Login link expired. Start again from Sign in with Tesla.",
   OAuthSignin: "Could not start Tesla sign-in. Try again.",
@@ -71,10 +71,22 @@ export function LoginPageClient({
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {authError && (
-            <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive text-xs leading-relaxed">
-              {AUTH_ERROR_MESSAGES[authError] ?? AUTH_ERROR_MESSAGES.Default}
-              {errorCode ? ` (${errorCode})` : ""}
-            </p>
+            <div className="flex flex-col gap-2">
+              <p className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-destructive text-xs leading-relaxed">
+                {AUTH_ERROR_MESSAGES[authError] ?? AUTH_ERROR_MESSAGES.Default}
+                {errorCode ? ` (${errorCode})` : ""}
+              </p>
+              {authError === "Configuration" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => signInWithTesla()}
+                >
+                  Try Tesla login again
+                </Button>
+              )}
+            </div>
           )}
           {showDemo && (
             <Button

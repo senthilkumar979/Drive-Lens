@@ -45,45 +45,38 @@ export async function GET() {
     }
     .primary { background: #2563eb; color: #fff; }
     .primary:hover { background: #1d4ed8; }
-    .secondary { background: #262626; color: #e5e5e5; border: 1px solid #404040; }
-    .secondary:hover { background: #333; }
     .hint { font-size: 0.75rem; color: #737373; }
-    textarea {
-      width: 100%; height: 4.5rem; font-size: 0.7rem;
-      background: #0a0a0a; color: #a3a3a3; border: 1px solid #333;
-      border-radius: 6px; padding: 0.5rem; resize: none;
+    .spinner {
+      width: 1.25rem; height: 1.25rem; margin: 0 auto;
+      border: 2px solid #404040; border-top-color: #2563eb;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
     }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
   <main>
     <h1>Connect your Tesla account</h1>
-    <p>
-      Tesla’s login page sometimes blocks automatic redirects (Akamai).
-      Use <strong>Open Tesla login</strong> or copy the link and paste it into
-      a new browser tab’s address bar.
+    <div class="spinner" aria-hidden="true"></div>
+    <p id="status">Redirecting to Tesla login…</p>
+    <p class="hint">
+      Stay in this browser tab. Do not copy the link — PKCE security requires
+      the same session you started here.
     </p>
     <div class="actions">
-      <a class="btn primary" id="open-tesla" href="${authorizeUrl.replace(/"/g, "&quot;")}"
-         rel="noreferrer noopener" target="_blank" referrerpolicy="no-referrer">
-        Open Tesla login (new tab)
-      </a>
-      <button type="button" class="btn secondary" id="copy-link">Copy authorization link</button>
+      <button type="button" class="btn primary" id="continue-tesla">
+        Continue to Tesla
+      </button>
     </div>
-    <textarea id="auth-url" readonly></textarea>
-    <p class="hint" id="copy-status"></p>
-    <p class="hint">After approving access, you will return to DriveLens dashboard.</p>
   </main>
   <script>
     (function () {
       var url = ${safeUrl};
-      var input = document.getElementById("auth-url");
-      input.value = url;
-      document.getElementById("copy-link").addEventListener("click", function () {
-        navigator.clipboard.writeText(url).then(function () {
-          document.getElementById("copy-status").textContent = "Link copied — paste it in a new tab address bar.";
-        });
-      });
+      function go() {
+        window.location.replace(url);
+      }
+      document.getElementById("continue-tesla").addEventListener("click", go);
+      setTimeout(go, 600);
     })();
   </script>
 </body>
