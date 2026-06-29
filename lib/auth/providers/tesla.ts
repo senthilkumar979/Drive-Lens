@@ -21,6 +21,9 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
   type: "oauth",
   clientId: process.env.TESLA_CLIENT_ID,
   clientSecret: process.env.TESLA_CLIENT_SECRET,
+  client: {
+    token_endpoint_auth_method: "client_secret_post",
+  },
   authorization: {
     url: "https://auth.tesla.com/oauth2/v3/authorize",
     params: {

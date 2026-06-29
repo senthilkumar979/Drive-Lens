@@ -15,26 +15,11 @@ applyAuthUrlEnv();
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: getAuthSecret(),
   trustHost: true,
+  debug: process.env.AUTH_DEBUG === "true",
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
-  },
-  events: {
-    async signIn({ user, account }) {
-      if (
-        account?.provider === "tesla" &&
-        account.access_token &&
-        user.email
-      ) {
-        await persistTeslaTokens(
-          user.email,
-          user.name ?? "Tesla Driver",
-          account.access_token,
-          account.refresh_token,
-          account.expires_at,
-        );
-      }
-    },
+    error: "/login",
   },
   providers: [
   ...(isMockMode()
@@ -82,14 +67,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ],
   callbacks: {
     async jwt({ token, user, account }) {
-      if (user?.id) {
-        token.userId = user.id;
-      }
-      if (account?.provider === "tesla" && account.access_token) {
+      if (account?.provider === "tesla" && account.access_token && user?.email) {
         token.teslaAccessToken = account.access_token;
         token.teslaRefreshToken = account.refresh_token;
         token.teslaExpiresAt = account.expires_at;
+        try {
+          const userId = await persistTeslaTokens(
+            user.email,
+            user.name ?? "Tesla Driver",
+            account.access_token,
+            account.refresh_token,
+            account.expires_at,
+          );
+          token.userId = userId;
+        } catch (error) {
+          console.error("[auth] Failed to persist Tesla tokens to MongoDB:", error);
+        }
+      } else if (user?.id) {
+        token.userId = user.id;
       }
+
       if (isMockMode() && !token.userId) {
         token.userId = DEMO_IDS.userId;
       }
