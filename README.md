@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# DriveLens
 
-## Getting Started
+**Understand Every Journey.**
 
-First, run the development server:
+Premium EV analytics dashboard — Next.js 16, MongoDB Atlas, Vercel.
+
+## Quick start (demo mode)
+
+No MongoDB or Tesla credentials required:
 
 ```bash
+cp .env.example .env.local
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000/login](http://localhost:3000/login) → **Continue with Demo**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Set `DRIVELENS_MOCK_MODE=false` and configure `MONGODB_URI`
+2. Register Tesla Fleet API app → `TESLA_CLIENT_ID`, `TESLA_CLIENT_SECRET`
+3. Set `AUTH_SECRET` (32+ chars)
+4. Add **Upstash QStash** from Vercel Marketplace → `QSTASH_TOKEN`, signing keys
+5. Run `npm run setup:qstash` after deploy to register schedules
+6. Optional: `GEMINI_API_KEY`, `MAPBOX_TOKEN`, `NEXT_PUBLIC_MAPBOX_TOKEN`
 
-## Learn More
+```bash
+npm run seed   # MongoDB indexes + demo user (requires MONGODB_URI)
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Features
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Feature | Status |
+| ------- | ------ |
+| Auth (Demo, Tesla OAuth, Google) | ✅ |
+| Vehicle sync (QStash 5-min + manual) | ✅ |
+| Snapshots, trips, charging detection | ✅ |
+| Analytics rollups | ✅ |
+| Dashboard charts (Recharts) | ✅ |
+| Maps (Mapbox / OSM fallback) | ✅ |
+| Favorites + send to vehicle | ✅ |
+| Gemini AI assistant | ✅ |
+| Notifications | ✅ |
+| Maintenance reminders | ✅ |
+| PDF reports | ✅ |
+| Vitest + GitHub Actions CI | ✅ |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Scripts
 
-## Deploy on Vercel
+| Command | Description |
+| ------- | ----------- |
+| `npm run dev` | Dev server |
+| `npm run build` | Production build |
+| `npm run test` | Vitest |
+| `npm run lint` | ESLint |
+| `npm run seed` | MongoDB indexes + demo user |
+| `npm run setup:qstash` | Register Upstash QStash schedules |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Docs
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [docs/PLAN.md](docs/PLAN.md) — development plan
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system design
