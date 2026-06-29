@@ -31,7 +31,7 @@ import {
   getTeslaPartnerDomain,
   getTeslaPublicKeyUrl,
 } from "@/lib/env";
-import { isValidEcPublicKeyPem, normalizePem } from "@/lib/tesla/pem";
+import { isValidEcPublicKeyPem, publicKeysMatch } from "@/lib/tesla/pem";
 import {
   fetchPartnerToken,
   registerPartnerAccount,
@@ -97,14 +97,19 @@ async function main() {
   const verified = await verifyPartnerPublicKey(token.access_token, domain);
   console.log("Verification response:", JSON.stringify(verified, null, 2));
 
-  const hostedPem = normalizePem(localPem);
-  if (verified.public_key && verified.public_key.trim() !== hostedPem.trim()) {
+  if (verified.public_key && publicKeysMatch(localPem, verified.public_key)) {
+    console.log("Registration verified successfully — public key matches.");
+  } else if (verified.public_key) {
     console.warn(
-      "Warning: registered public key does not match TESLA_FLEET_PUBLIC_KEY_PEM locally.",
+      "Warning: Tesla returned a public key that does not match TESLA_FLEET_PUBLIC_KEY_PEM.",
     );
   } else {
-    console.log("Registration verified successfully.");
+    console.log("Registration completed (no public_key in verification response).");
   }
+
+  console.log("");
+  console.log("Partner registration complete for EU Fleet API.");
+  console.log("Next: sign in with Tesla OAuth, then pair the virtual key on your vehicle for commands.");
 }
 
 main().catch((err) => {

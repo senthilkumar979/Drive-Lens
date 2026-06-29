@@ -1,5 +1,6 @@
 import {
   getTeslaFleetApiUrl,
+  getTeslaFleetAudience,
   getTeslaFleetAuthUrl,
 } from "@/lib/env";
 
@@ -41,6 +42,7 @@ export async function refreshTeslaToken(refreshToken: string): Promise<{
       client_id: process.env.TESLA_CLIENT_ID ?? "",
       client_secret: process.env.TESLA_CLIENT_SECRET ?? "",
       refresh_token: refreshToken,
+      audience: getTeslaFleetAudience(),
     }),
   });
 

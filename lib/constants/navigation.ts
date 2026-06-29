@@ -33,4 +33,5 @@ export const mainNavItems: NavItem[] = [
 export const BRAND = {
   name: "DriveLens",
   tagline: "Understand Every Journey.",
+  productionUrl: "https://drive-lens-one.vercel.app",
 } as const;
