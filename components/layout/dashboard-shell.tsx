@@ -19,7 +19,9 @@ export const DashboardShell = ({ children, title }: DashboardShellProps) => {
             <h1 className="text-sm font-medium text-foreground">{title}</h1>
           )}
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
+        <main className="bg-dashboard-gradient flex-1 overflow-auto p-4 md:p-6">
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );

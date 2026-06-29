@@ -28,7 +28,9 @@ export const AppSidebar = () => {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex size-8 items-center justify-center rounded-xl bg-primary text-sm font-bold text-primary-foreground shadow-card">
+          <div
+            className="flex size-8 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 via-violet-500 to-cyan-400 text-sm font-bold text-white shadow-elevated"
+          >
             DL
           </div>
           <div className="flex flex-col group-data-[collapsible=icon]:hidden">

@@ -30,7 +30,7 @@ export default function VehiclePage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => sync.mutate()}
+            onClick={() => sync.mutate({ wake: true })}
             disabled={sync.isPending}
           >
             <RefreshCw className={`mr-2 size-4 ${sync.isPending ? "animate-spin" : ""}`} />

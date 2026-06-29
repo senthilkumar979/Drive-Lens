@@ -10,12 +10,23 @@ export function mapTeslaVehicle(
   },
 ): Vehicle {
   return {
-    id: String(vehicle.id),
+    id: vehicle.vin,
     provider: "tesla",
     displayName: vehicle.display_name || "Tesla",
     vin: vehicle.vin,
     model: "Tesla",
   };
+}
+
+function rangeKmFromCharge(
+  charge: TeslaVehicleDataResponse["response"]["charge_state"],
+): number {
+  const miles =
+    charge?.est_battery_range ??
+    charge?.ideal_battery_range ??
+    charge?.rated_battery_range ??
+    0;
+  return Math.round(miles * 1.60934);
 }
 
 export function mapTeslaSnapshot(
@@ -31,7 +42,7 @@ export function mapTeslaSnapshot(
     vehicleId,
     timestamp: new Date(),
     batteryLevel: charge?.battery_level ?? 0,
-    rangeKm: Math.round((charge?.est_battery_range ?? 0) * 1.60934),
+    rangeKm: rangeKmFromCharge(charge),
     odometerKm: vehicle?.odometer ? vehicle.odometer * 1.60934 : undefined,
     locked: vehicle?.locked,
     climate: climate

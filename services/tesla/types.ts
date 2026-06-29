@@ -8,11 +8,21 @@ export interface TeslaVehicleResponse {
   }>;
 }
 
+export interface TeslaVehicleDetailResponse {
+  response: {
+    state?: string;
+    vin?: string;
+    display_name?: string;
+  };
+}
+
 export interface TeslaVehicleDataResponse {
   response: {
     charge_state?: {
       battery_level: number;
-      est_battery_range: number;
+      est_battery_range?: number;
+      ideal_battery_range?: number;
+      rated_battery_range?: number;
       charging_state: string;
       charge_limit_soc?: number;
     };

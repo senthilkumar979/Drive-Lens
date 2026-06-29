@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -22,27 +22,45 @@ export const BatteryChart = ({ data }: BatteryChartProps) => {
   }));
 
   return (
-    <ResponsiveContainer width="100%" height={200}>
-      <LineChart data={chartData}>
-        <CartesianGrid strokeDasharray="3 3" stroke="#2e3440" />
-        <XAxis dataKey="time" tick={{ fill: "#6f7782", fontSize: 10 }} />
-        <YAxis domain={[0, 100]} tick={{ fill: "#6f7782", fontSize: 10 }} />
+    <ResponsiveContainer width="100%" height={220}>
+      <AreaChart data={chartData}>
+        <defs>
+          <linearGradient id="batteryFill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#34d399" stopOpacity={0.45} />
+            <stop offset="100%" stopColor="#34d399" stopOpacity={0.02} />
+          </linearGradient>
+          <linearGradient id="batteryStroke" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#10b981" />
+            <stop offset="50%" stopColor="#34d399" />
+            <stop offset="100%" stopColor="#6ee7b7" />
+          </linearGradient>
+        </defs>
+        <CartesianGrid strokeDasharray="3 3" stroke="#2e3440" vertical={false} />
+        <XAxis dataKey="time" tick={{ fill: "#94a3b8", fontSize: 10 }} axisLine={false} />
+        <YAxis
+          domain={[0, 100]}
+          tick={{ fill: "#94a3b8", fontSize: 10 }}
+          axisLine={false}
+          tickLine={false}
+        />
         <Tooltip
           contentStyle={{
             background: "#1e232b",
-            border: "1px solid #2e3440",
-            borderRadius: 8,
+            border: "1px solid rgba(52, 211, 153, 0.3)",
+            borderRadius: 10,
+            color: "#f5f7fa",
           }}
+          labelStyle={{ color: "#94a3b8" }}
         />
-        <Line
+        <Area
           type="monotone"
           dataKey="battery"
-          stroke="#00d084"
-          strokeWidth={2}
-          dot={false}
-          isAnimationActive={true}
+          stroke="url(#batteryStroke)"
+          strokeWidth={2.5}
+          fill="url(#batteryFill)"
+          isAnimationActive
         />
-      </LineChart>
+      </AreaChart>
     </ResponsiveContainer>
   );
 };

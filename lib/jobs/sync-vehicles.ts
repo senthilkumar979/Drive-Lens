@@ -3,12 +3,14 @@ import {
   findUserById,
   getAllUsers,
   insertSnapshot,
+  upsertUser,
   upsertVehicle,
 } from "@/lib/db/repositories";
 import { isMockMode } from "@/lib/env";
 import { getDefaultVehicleProvider } from "@/lib/providers/vehicle";
 import { refreshTeslaToken } from "@/services/tesla/client";
 import { getTeslaVehicleData } from "@/services/tesla/api";
+import { ensureTeslaVehicleOnline } from "@/services/tesla/wake";
 import { mapTeslaSnapshotToDocument } from "@/services/tesla/mapper";
 import { evaluateAlerts } from "./alert-evaluator";
 import "@/lib/providers/vehicle/index";
@@ -37,14 +39,27 @@ async function getAccessToken(userId: string): Promise<string | null> {
     const refresh = decryptToken(user.teslaAccount.refreshToken);
     const tokens = await refreshTeslaToken(refresh);
     accessToken = tokens.access_token;
-    // Token persistence would update user in DB — simplified here
-    encryptToken(tokens.access_token);
+    await upsertUser({
+      email: user.email,
+      name: user.name,
+      preferences: user.preferences,
+      teslaAccount: {
+        accessToken: encryptToken(tokens.access_token),
+        refreshToken: tokens.refresh_token
+          ? encryptToken(tokens.refresh_token)
+          : user.teslaAccount.refreshToken,
+        expiresAt: new Date(Date.now() + tokens.expires_in * 1000),
+      },
+    });
   }
 
   return accessToken;
 }
 
-export async function syncUserVehicles(userId: string): Promise<{
+export async function syncUserVehicles(
+  userId: string,
+  options?: { wake?: boolean },
+): Promise<{
   snapshots: number;
   errors: string[];
 }> {
@@ -94,6 +109,9 @@ export async function syncUserVehicles(userId: string): Promise<{
           heading: snap.location?.heading,
         };
       } else {
+        if (options?.wake) {
+          await ensureTeslaVehicleOnline(accessToken, vehicle.id);
+        }
         const data = await getTeslaVehicleData(accessToken, vehicle.id);
         snapshotDoc = mapTeslaSnapshotToDocument(userId, vehicleId, data);
       }

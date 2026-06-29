@@ -115,7 +115,7 @@ export async function upsertVehicle(
     {
       userId: vehicle.userId,
       provider: vehicle.provider,
-      externalId: vehicle.externalId,
+      $or: [{ externalId: vehicle.externalId }, { vin: vehicle.vin }],
     },
     { $set: vehicle },
     { upsert: true, returnDocument: "after" },

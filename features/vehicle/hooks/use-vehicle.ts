@@ -1,5 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+interface SyncVehicleOptions {
+  wake?: boolean;
+}
+
+interface SyncVehicleResult {
+  snapshots: number;
+  errors: string[];
+}
+
 export function useVehicle() {
   return useQuery({
     queryKey: ["vehicle"],
@@ -25,14 +34,26 @@ export function useVehicleSnapshots(days = 7) {
 export function useSyncVehicle() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async () => {
-      const res = await fetch("/api/vehicle/sync", { method: "POST" });
-      if (!res.ok) throw new Error("Sync failed");
-      return res.json();
+    mutationFn: async (options?: SyncVehicleOptions) => {
+      const res = await fetch("/api/vehicle/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ wake: options?.wake ?? true }),
+      });
+      const data = (await res.json()) as SyncVehicleResult & { error?: string };
+      if (!res.ok) {
+        throw new Error(data.error ?? "Sync failed");
+      }
+      if (data.errors?.length) {
+        throw new Error(data.errors.join("; "));
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["vehicle"] });
       queryClient.invalidateQueries({ queryKey: ["vehicle-snapshots"] });
+      queryClient.invalidateQueries({ queryKey: ["trips"] });
+      queryClient.invalidateQueries({ queryKey: ["charging-sessions"] });
     },
   });
 }
