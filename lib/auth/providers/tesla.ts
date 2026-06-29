@@ -30,6 +30,7 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
       scope: TESLA_SCOPES,
       locale: "en-US",
       prompt: "login",
+      prompt_missing_scopes: "true",
     },
   },
   token: {
@@ -37,6 +38,7 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
   },
   [customFetch]: teslaOAuthFetch,
   userinfo: {
+    url: "https://auth.tesla.com/oauth2/v3/userinfo",
     async request(context: {
       tokens: { access_token?: string; id_token?: string };
     }) {
@@ -53,7 +55,8 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
       name: profile.name ?? "Tesla Driver",
     };
   },
-  checks: ["pkce"],
+  // Confidential client (client_secret_post) — PKCE cookies caused callback failures on Vercel.
+  checks: [],
 };
 
 export async function persistTeslaTokens(

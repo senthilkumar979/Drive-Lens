@@ -20,7 +20,7 @@ interface LoginPageClientProps {
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   Configuration:
-    "Tesla login session expired or was started in another tab/device. Clear site cookies, click Sign in with Tesla again, and complete login in the same tab (do not copy the link).",
+    "Tesla sign-in could not finish. Revoke DriveLens in your Tesla account (Settings → Security → Third-party apps), then click Sign in with Tesla again.",
   AccessDenied: "Tesla denied access. Approve all requested scopes.",
   Verification: "Login link expired. Start again from Sign in with Tesla.",
   OAuthSignin: "Could not start Tesla sign-in. Try again.",
