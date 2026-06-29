@@ -8,6 +8,10 @@
  *
  * Usage: npm run setup:qstash
  */
+import { loadEnvFiles } from "./load-env";
+
+loadEnvFiles();
+
 import { setupQStashSchedules } from "../lib/qstash/setup-schedules";
 
 async function main() {

@@ -4,7 +4,7 @@ import Google from "next-auth/providers/google";
 import { upsertUser } from "@/lib/db/repositories";
 import { getAuthSecret, hasTeslaCredentials, isMockMode } from "@/lib/env";
 import { DEMO_IDS, seedDemoData } from "@/lib/mock/seed";
-import { teslaProvider } from "./providers/tesla";
+import { teslaProvider, persistTeslaTokens } from "./providers/tesla";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: getAuthSecret(),
@@ -12,6 +12,23 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
+  },
+  events: {
+    async signIn({ user, account }) {
+      if (
+        account?.provider === "tesla" &&
+        account.access_token &&
+        user.email
+      ) {
+        await persistTeslaTokens(
+          user.email,
+          user.name ?? "Tesla Driver",
+          account.access_token,
+          account.refresh_token,
+          account.expires_at,
+        );
+      }
+    },
   },
   providers: [
   ...(isMockMode()

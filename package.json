@@ -13,6 +13,8 @@
     "test:watch": "vitest",
     "seed": "tsx scripts/seed.ts",
     "setup:qstash": "tsx scripts/setup-qstash.ts",
+    "generate:tesla-keys": "tsx scripts/generate-tesla-keys.ts",
+    "register:tesla-partner": "tsx scripts/register-tesla-partner.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -52,6 +54,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.0.3",
+    "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "husky": "^9.1.7",

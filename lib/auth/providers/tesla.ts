@@ -1,4 +1,8 @@
 import type { OAuthConfig } from "next-auth/providers";
+import {
+  getTeslaFleetAudience,
+  getTeslaFleetAuthUrl,
+} from "@/lib/env";
 import { encryptToken } from "@/lib/crypto/encryption";
 import { upsertUser } from "@/lib/db/repositories";
 
@@ -7,6 +11,9 @@ interface TeslaProfile {
   name?: string;
   sub?: string;
 }
+
+const TESLA_SCOPES =
+  "openid offline_access user_data vehicle_device_data vehicle_cmds vehicle_location";
 
 export const teslaProvider: OAuthConfig<TeslaProfile> = {
   id: "tesla",
@@ -17,11 +24,17 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
   authorization: {
     url: "https://auth.tesla.com/oauth2/v3/authorize",
     params: {
-      scope:
-        "openid offline_access user_data vehicle_device_data vehicle_cmds vehicle_location",
+      scope: TESLA_SCOPES,
+      locale: "en-US",
+      prompt: "login",
     },
   },
-  token: "https://auth.tesla.com/oauth2/v3/token",
+  token: {
+    url: `${getTeslaFleetAuthUrl()}/token`,
+    params: {
+      audience: getTeslaFleetAudience(),
+    },
+  },
   userinfo: "https://auth.tesla.com/oauth2/v3/userinfo",
   profile(profile) {
     return {

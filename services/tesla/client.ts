@@ -1,8 +1,10 @@
-const TESLA_FLEET_BASE =
-  process.env.TESLA_FLEET_API_URL ??
-  "https://fleet-api.prd.na.vn.cloud.tesla.com";
+import {
+  getTeslaFleetApiUrl,
+  getTeslaFleetAuthUrl,
+} from "@/lib/env";
 
-const TESLA_AUTH_URL = "https://auth.tesla.com/oauth2/v3";
+const TESLA_FLEET_BASE = getTeslaFleetApiUrl();
+const TESLA_TOKEN_URL = `${getTeslaFleetAuthUrl()}/token`;
 
 export async function teslaFetch<T>(
   path: string,
@@ -31,7 +33,7 @@ export async function refreshTeslaToken(refreshToken: string): Promise<{
   refresh_token?: string;
   expires_in: number;
 }> {
-  const response = await fetch(`${TESLA_AUTH_URL}/token`, {
+  const response = await fetch(TESLA_TOKEN_URL, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
@@ -43,7 +45,8 @@ export async function refreshTeslaToken(refreshToken: string): Promise<{
   });
 
   if (!response.ok) {
-    throw new Error(`Tesla token refresh failed: ${response.status}`);
+    const text = await response.text();
+    throw new Error(`Tesla token refresh failed: ${response.status} ${text}`);
   }
 
   return response.json();

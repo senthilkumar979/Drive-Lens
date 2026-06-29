@@ -26,3 +26,110 @@ export function hasGeminiKey(): boolean {
 export function hasMapboxToken(): boolean {
   return Boolean(process.env.MAPBOX_TOKEN);
 }
+
+/** Regional Fleet API base URL — token audience must match this (EU default) */
+export function getTeslaFleetAudience(): string {
+  return (
+    process.env.TESLA_FLEET_AUDIENCE ??
+    process.env.TESLA_FLEET_API_URL ??
+    "https://fleet-api.prd.eu.vn.cloud.tesla.com"
+  );
+}
+
+export function getTeslaFleetApiUrl(): string {
+  return getTeslaFleetAudience();
+}
+
+/** Token exchange + refresh — NOT auth.tesla.com */
+export function getTeslaFleetAuthUrl(): string {
+  return (
+    process.env.TESLA_FLEET_AUTH_URL ??
+    "https://fleet-auth.prd.vn.cloud.tesla.com/oauth2/v3"
+  );
+}
+
+const TESLA_PUBLIC_KEY_PATH =
+  "/.well-known/appspecific/com.tesla.3p.public-key.pem";
+
+function isLocalHostname(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname.endsWith(".local")
+  );
+}
+
+function normalizeHostname(value: string): string {
+  return value.replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+function parseOrigin(value: string): string {
+  const trimmed = value.trim();
+  const withProtocol = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed}`;
+  return new URL(withProtocol).origin;
+}
+
+function collectOriginCandidates(): string[] {
+  const candidates: Array<string | undefined> = [
+    process.env.TESLA_PARTNER_DOMAIN?.trim(),
+    process.env.QSTASH_CALLBACK_URL?.trim(),
+    process.env.TESLA_REDIRECT_URI?.trim()
+      ? new URL(process.env.TESLA_REDIRECT_URI.trim()).origin
+      : undefined,
+    process.env.AUTH_URL?.trim(),
+  ];
+
+  return candidates
+    .filter((value): value is string => Boolean(value))
+    .map((value) => parseOrigin(value));
+}
+
+function resolveTeslaAppOrigin(options?: { preferPublic?: boolean }): string {
+  const origins = collectOriginCandidates();
+  if (origins.length === 0) {
+    throw new Error(
+      "Set one of: TESLA_PARTNER_DOMAIN, QSTASH_CALLBACK_URL, TESLA_REDIRECT_URI, or AUTH_URL",
+    );
+  }
+
+  if (options?.preferPublic) {
+    const publicOrigin = origins.find(
+      (origin) => !isLocalHostname(new URL(origin).hostname),
+    );
+    if (publicOrigin) return publicOrigin;
+    throw new Error(
+      "Partner registration needs a public domain (not localhost). Set TESLA_PARTNER_DOMAIN=drive-lens-one.vercel.app or add TESLA_REDIRECT_URI with your production URL.",
+    );
+  }
+
+  return origins[0];
+}
+
+/** Hostname used for Fleet API partner registration (no protocol). */
+export function getTeslaPartnerDomain(): string {
+  const explicit = process.env.TESLA_PARTNER_DOMAIN?.trim();
+  if (explicit) return normalizeHostname(explicit);
+
+  return new URL(resolveTeslaAppOrigin({ preferPublic: true })).hostname;
+}
+
+export function getTeslaPublicKeyUrl(): string {
+  return `${resolveTeslaAppOrigin({ preferPublic: true })}${TESLA_PUBLIC_KEY_PATH}`;
+}
+
+export function getTeslaPublicKeyPath(): string {
+  return TESLA_PUBLIC_KEY_PATH;
+}
+
+export function getTeslaFleetPublicKeyPem(): string | undefined {
+  const raw = process.env.TESLA_FLEET_PUBLIC_KEY_PEM?.trim();
+  return raw || undefined;
+}
+
+export function getTeslaFleetPrivateKeyPem(): string | undefined {
+  const raw = process.env.TESLA_FLEET_PRIVATE_KEY_PEM?.trim();
+  return raw || undefined;
+}
+
