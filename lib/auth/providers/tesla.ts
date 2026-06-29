@@ -1,10 +1,9 @@
+import { customFetch } from "@auth/core";
 import type { OAuthConfig } from "next-auth/providers";
-import {
-  getTeslaFleetAudience,
-  getTeslaFleetAuthUrl,
-} from "@/lib/env";
+import { getTeslaFleetAuthUrl } from "@/lib/env";
 import { encryptToken } from "@/lib/crypto/encryption";
 import { upsertUser } from "@/lib/db/repositories";
+import { teslaOAuthFetch } from "./tesla-fetch";
 
 interface TeslaProfile {
   email?: string;
@@ -34,10 +33,8 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
   },
   token: {
     url: `${getTeslaFleetAuthUrl()}/token`,
-    params: {
-      audience: getTeslaFleetAudience(),
-    },
   },
+  [customFetch]: teslaOAuthFetch,
   userinfo: "https://auth.tesla.com/oauth2/v3/userinfo",
   profile(profile) {
     return {

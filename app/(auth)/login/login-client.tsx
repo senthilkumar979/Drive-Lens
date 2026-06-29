@@ -20,7 +20,7 @@ interface LoginPageClientProps {
 
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   Configuration:
-    "Sign-in could not finish — usually MONGODB_URI, AUTH_SECRET, or Tesla client secret on Vercel. Check server logs.",
+    "Tesla token exchange failed (audience, client secret, or PKCE). Use Open Tesla login in the same browser — do not copy the link to another device.",
   AccessDenied: "Tesla denied access. Approve all requested scopes.",
   Verification: "Login link expired. Start again from Sign in with Tesla.",
   OAuthSignin: "Could not start Tesla sign-in. Try again.",
