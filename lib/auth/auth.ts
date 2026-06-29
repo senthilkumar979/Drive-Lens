@@ -16,6 +16,19 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   secret: getAuthSecret(),
   trustHost: true,
   debug: process.env.AUTH_DEBUG === "true",
+  logger: {
+    error(error) {
+      console.error("[auth][error]", error);
+    },
+    warn(code) {
+      console.warn("[auth][warn]", code);
+    },
+    debug(code, metadata) {
+      if (process.env.AUTH_DEBUG === "true") {
+        console.debug("[auth][debug]", code, metadata);
+      }
+    },
+  },
   session: { strategy: "jwt" },
   pages: {
     signIn: "/login",
@@ -68,9 +81,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   callbacks: {
     async jwt({ token, user, account }) {
       if (account?.provider === "tesla" && account.access_token && user?.email) {
-        token.teslaAccessToken = account.access_token;
-        token.teslaRefreshToken = account.refresh_token;
-        token.teslaExpiresAt = account.expires_at;
         try {
           const userId = await persistTeslaTokens(
             user.email,

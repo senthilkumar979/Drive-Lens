@@ -5,6 +5,7 @@ import { encryptToken } from "@/lib/crypto/encryption";
 import { upsertUser } from "@/lib/db/repositories";
 import { teslaOAuthFetch } from "./tesla-fetch";
 import { fetchTeslaUserProfile } from "./tesla-userinfo";
+import { stripTeslaIdTokenFromResponse } from "./tesla-token";
 
 interface TeslaProfile {
   email?: string;
@@ -35,6 +36,7 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
   },
   token: {
     url: `${getTeslaFleetAuthUrl()}/token`,
+    conform: stripTeslaIdTokenFromResponse,
   },
   [customFetch]: teslaOAuthFetch,
   userinfo: {
@@ -48,6 +50,7 @@ export const teslaProvider: OAuthConfig<TeslaProfile> = {
       );
     },
   },
+  allowDangerousEmailAccountLinking: true,
   profile(profile) {
     return {
       id: profile.sub ?? "tesla-user",
